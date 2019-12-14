@@ -1,0 +1,46 @@
+from google.colab import files #Upload Files
+
+uploaded = files.upload()
+
+for fn in uploaded.keys():
+  print('User uploaded file "{name}" with length {length} bytes'.format(
+      name=fn, length=len(uploaded[fn])))
+     
+import io
+import pandas as pd
+
+df_train = pd.read_csv(io.StringIO(uploaded['train.csv'].decode('utf-8')))
+print(df_train.head())
+
+df_test = pd.read_csv(io.StringIO(uploaded['test.csv'].decode('utf-8')))
+print(df_test.head())
+
+missing_count = (df_train.isnull().sum() / len(df_train)) * 100
+
+missing_count = missing_count[missing_count > 0]
+
+print(missing_count.sort_values())
+
+import seaborn as sns
+sns.distplot(df_train['SalePrice'])
+
+import numpy as np
+
+target = np.log(df_train['SalePrice'])
+
+sns.distplot(target)
+
+numeric_data = df_train.select_dtypes(include = [np.number])
+
+categorial_data = df_train.select_dtypes(exclude = [np.number])
+
+print('There are {0} numerical and {1} categorical features in the training data'.\
+      format(numeric_data.shape[1], categorial_data.shape[1]))
+      
+corr = numeric_data.corr()
+
+sns.heatmap(corr)
+
+del numeric_data['Id']
+
+numeric_data.columns
